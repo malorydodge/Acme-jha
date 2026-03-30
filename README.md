@@ -53,9 +53,9 @@ PostgreSQL Setup
 Create Database
 ```bash
 CREATE DATABASE jha_app;
-
+```
 Update connection string in database.py
-
+```bash
 DATABASE_URL = "postgresql://postgres:password@localhost/jha_app"
 ```
 
