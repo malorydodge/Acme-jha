@@ -13,15 +13,18 @@ class JHA(Base):
 
     steps = relationship("Step", back_populates="jha", cascade="all, delete")
 
+
 class Step(Base):
     __tablename__ = "steps"
 
     id = Column(Integer, primary_key=True, index=True)
     description = Column(Text)
+    photo = Column(String, nullable=True)  # NEW
     jha_id = Column(Integer, ForeignKey("jhas.id"))
 
     jha = relationship("JHA", back_populates="steps")
     hazards = relationship("Hazard", back_populates="step", cascade="all, delete")
+
 
 class Hazard(Base):
     __tablename__ = "hazards"

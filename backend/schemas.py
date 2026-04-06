@@ -2,83 +2,42 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 
-# -------------------------
-# Control
-# -------------------------
-
-class ControlBase(BaseModel):
+class Control(BaseModel):
+    id: Optional[int]
     description: str
-
-
-class ControlCreate(ControlBase):
-    pass
-
-
-class Control(ControlBase):
-    id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
-# -------------------------
-# Hazard
-# -------------------------
-
-class HazardBase(BaseModel):
+class Hazard(BaseModel):
+    id: Optional[int]
     description: str
-
-
-class HazardCreate(HazardBase):
-    controls: List[ControlCreate] = []
-
-
-class Hazard(HazardBase):
-    id: int
+    consequence: Optional[str]
     controls: List[Control] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
-# -------------------------
-# Step
-# -------------------------
-
-class StepBase(BaseModel):
+class Step(BaseModel):
+    id: Optional[int]
     description: str
-
-
-class StepCreate(StepBase):
-    hazards: List[HazardCreate] = []
-
-
-class Step(StepBase):
-    id: int
+    photo: Optional[str]  # NEW
     hazards: List[Hazard] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-
-# -------------------------
-# JHA
-# -------------------------
 
 class JHABase(BaseModel):
     title: str
     author: str
-    department: Optional[str] = None
+    department: str
 
 
 class JHACreate(JHABase):
-    steps: List[StepCreate] = []
-
-
-class JHAUpdate(BaseModel):
-    title: Optional[str] = None
-    author: Optional[str] = None
-    department: Optional[str] = None
+    steps: List[Step] = []
 
 
 class JHA(JHABase):
@@ -86,4 +45,4 @@ class JHA(JHABase):
     steps: List[Step] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
