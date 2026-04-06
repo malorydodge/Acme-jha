@@ -117,3 +117,9 @@ const deleteJha = async (jha) => {
   }
 };
 </script>
+
+<style scoped>
+.button.mx-2 {
+  margin-top: -0.5rem;
+}
+</style>

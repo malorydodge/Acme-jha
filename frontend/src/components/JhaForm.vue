@@ -43,14 +43,14 @@
 
               <div>
                 <button
-                  class="button is-small"
+                  class="button is-small mx-1"
                   @click="step.collapsed = !step.collapsed"
                 >
                   {{ step.collapsed ? "Expand" : "Collapse" }}
                 </button>
 
                 <button
-                  class="button is-danger is-small"
+                  class="button is-danger is-small mx-1"
                   @click="removeStep(index)"
                 >
                   Remove
@@ -64,13 +64,14 @@
                 <input class="input" v-model="step.description" />
               </div>
 
+              <!-- Photo -->
               <div class="field">
                 <label class="label">Photo</label>
                 <input type="file" @change="onFileChange($event, step)" />
 
                 <img
-                  v-if="step.preview"
-                  :src="step.preview"
+                  v-if="step.preview || step.photo"
+                  :src="step.preview || getPhotoUrl(step.photo)"
                   class="step-image"
                 />
               </div>
@@ -79,7 +80,7 @@
               <div class="hazards">
                 <div class="level">
                   <h4 class="subtitle is-6">Hazards</h4>
-                  <button class="button is-small" @click="addHazard(step)">
+                  <button class="button is-small mx-1" @click="addHazard(step)">
                     Add Hazard
                   </button>
                 </div>
@@ -94,7 +95,7 @@
 
                     <div>
                       <button
-                        class="button is-small"
+                        class="button is-small mx-1"
                         @click="hazard.collapsed = !hazard.collapsed"
                       >
                         {{ hazard.collapsed ? "Expand" : "Collapse" }}
@@ -140,7 +141,7 @@
 
                           <div>
                             <button
-                              class="button is-small"
+                              class="button is-small mx-1"
                               @click="control.collapsed = !control.collapsed"
                             >
                               {{ control.collapsed ? "Expand" : "Collapse" }}
@@ -180,55 +181,30 @@
     <button v-if="isEdit" class="button is-danger mx-2" @click="deleteJha">
       Delete
     </button>
+
     <button v-if="isEdit" class="button mx-2" @click="cancel">Cancel</button>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted, computed, watch } from "vue";
+import { reactive, onMounted, computed } from "vue";
 import draggable from "vuedraggable";
 import { useRouter } from "vue-router";
 import api from "../services/api";
 
 const props = defineProps({
-  id: {
-    type: String,
-    required: false,
-  },
+  id: String,
 });
 
 const router = useRouter();
 const isEdit = computed(() => !!props.id);
-
-onMounted(async () => {
-  if (props.id) {
-    const response = await api.get(`/jhas/${props.id}`);
-    form.value = response.data;
-  }
-});
-
-const cancel = () => {
-  router.push("/");
-};
-
-const deleteJha = async (jha) => {
-  if (confirm(`Are you sure you want to delete JHA with title ${jha.title}?`)) {
-    try {
-      const response = await api.delete(`/jhas/${jha.id}`);
-      if (response.status === 204) {
-        router.push("/");
-      }
-    } catch (error) {
-      console.error("Error deleting item:", error);
-    }
-  }
-};
 
 const createStep = () => ({
   id: Date.now() + Math.random(),
   description: "",
   file: null,
   preview: null,
+  photo: null,
   collapsed: false,
   hazards: [],
 });
@@ -259,15 +235,30 @@ const errors = reactive({
   department: "",
 });
 
-watch(
-  () => props.jha,
-  (jha) => {
-    if (jha) {
-      Object.assign(form, jha);
-    }
-  },
-  { immediate: true },
-);
+const getPhotoUrl = (photo) => {
+  if (!photo) return null;
+  return `http://localhost:8000/${photo}`;
+};
+
+onMounted(async () => {
+  if (props.id) {
+    const response = await api.get(`/jhas/${props.id}`);
+    Object.assign(form, response.data);
+
+    form.steps.forEach((step) => {
+      step.collapsed = false;
+    });
+  }
+});
+
+const cancel = () => router.push("/");
+
+const deleteJha = async () => {
+  if (confirm("Delete this JHA?")) {
+    await api.delete(`/jhas/${props.id}`);
+    router.push("/");
+  }
+};
 
 const validate = () => {
   errors.title = !form.title ? "Title is required" : "";
@@ -303,30 +294,29 @@ const save = async () => {
   formData.append("author", form.author);
   formData.append("department", form.department);
 
-  form.steps.forEach((step, i) => {
-    formData.append(`steps[${i}][description]`, step.description);
+  formData.append(
+    "steps",
+    JSON.stringify(
+      form.steps.map((step) => ({
+        description: step.description,
+        hazards: step.hazards.map((hazard) => ({
+          description: hazard.description,
+          controls: hazard.controls.map((control) => ({
+            description: control.description,
+          })),
+        })),
+      })),
+    ),
+  );
 
+  form.steps.forEach((step) => {
     if (step.file) {
-      formData.append(`steps[${i}][photo]`, step.file);
+      formData.append("photos", step.file);
     }
-
-    step.hazards.forEach((hazard, h) => {
-      formData.append(
-        `steps[${i}][hazards][${h}][description]`,
-        hazard.description,
-      );
-
-      hazard.controls.forEach((control, c) => {
-        formData.append(
-          `steps[${i}][hazards][${h}][controls][${c}]`,
-          control.description,
-        );
-      });
-    });
   });
 
   if (isEdit.value) {
-    await api.put(`/jhas/${props.jha.id}`, formData);
+    await api.put(`/jhas/${props.id}`, formData);
   } else {
     await api.post("/jhas", formData);
   }
@@ -334,3 +324,11 @@ const save = async () => {
   router.push("/");
 };
 </script>
+
+<style scoped>
+.step-image {
+  margin-top: 10px;
+  max-width: 400px;
+  border-radius: 6px;
+}
+</style>
