@@ -25,12 +25,13 @@
 
     <!-- Steps -->
     <div class="steps">
-      <div class="level">
+      <div class="level" v-if="form.steps.length || isAddingStep">
         <h2 class="subtitle">Steps</h2>
         <button class="button is-small is-primary" @click="addStep">
           Add Step
         </button>
       </div>
+      <p v-else>No steps yet</p>
 
       <draggable v-model="form.steps" item-key="id" handle=".drag-handle">
         <template #item="{ element: step, index }">
@@ -59,6 +60,7 @@
             </div>
 
             <div v-if="!step.collapsed">
+              <!-- Step Description -->
               <div class="field">
                 <label class="label">Step Description</label>
                 <input class="input" v-model="step.description" />
@@ -67,19 +69,34 @@
               <!-- Photo -->
               <div class="field">
                 <label class="label">Photo</label>
-                <input type="file" @change="onFileChange($event, step)" />
-
-                <img
-                  v-if="step.preview || step.photo"
-                  :src="step.preview || getPhotoUrl(step.photo)"
-                  class="step-image"
+                <input
+                  type="file"
+                  @change="onFileChange($event, step)"
+                  :value="step.file?.name || ''"
                 />
+
+                <div v-if="step.preview || step.photo">
+                  <img
+                    :src="step.preview || getPhotoUrl(step.photo)"
+                    class="step-image"
+                  />
+                  <button
+                    class="button is-small is-danger mt-1 is-pulled-right"
+                    @click="removePhoto(step)"
+                  >
+                    Remove Photo
+                  </button>
+                  <p>{{ step.file?.name || getFileName(step.photo) }}</p>
+                </div>
               </div>
 
               <!-- Hazards -->
-              <div class="hazards">
+              <div
+                class="hazards"
+                v-if="step.hazards.length || step.isAddingHazard"
+              >
                 <div class="level">
-                  <h4 class="subtitle is-6">Hazards</h4>
+                  <h4 class="subtitle is-4">Hazards</h4>
                   <button class="button is-small mx-1" @click="addHazard(step)">
                     Add Hazard
                   </button>
@@ -120,9 +137,12 @@
                     </div>
 
                     <!-- Controls -->
-                    <div class="controls">
+                    <div
+                      class="controls"
+                      v-if="hazard.controls.length || hazard.isAddingControl"
+                    >
                       <div class="level">
-                        <h5 class="subtitle is-7">Controls</h5>
+                        <h5 class="subtitle is-5">Controls</h5>
                         <button
                           class="button is-small"
                           @click="addControl(hazard)"
@@ -165,24 +185,33 @@
                         </div>
                       </div>
                     </div>
+                    <p v-else class="has-text-grey">No controls yet</p>
                   </div>
                 </div>
               </div>
+              <p v-else class="has-text-grey">No hazards yet</p>
             </div>
           </div>
         </template>
       </draggable>
     </div>
+    <div class="container m-2">
+      <button v-if="isEdit" class="button is-pulled-right mr-2" @click="cancel">
+        Cancel
+      </button>
 
-    <button class="button is-primary" @click="save">
-      {{ isEdit ? "Update" : "Create" }}
-    </button>
+      <button
+        v-if="isEdit"
+        class="button is-danger mx-2 is-pulled-right"
+        @click="deleteJha"
+      >
+        Delete
+      </button>
 
-    <button v-if="isEdit" class="button is-danger mx-2" @click="deleteJha">
-      Delete
-    </button>
-
-    <button v-if="isEdit" class="button mx-2" @click="cancel">Cancel</button>
+      <button class="button is-primary is-pulled-right" @click="save">
+        {{ isEdit ? "Update" : "Create" }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -192,13 +221,11 @@ import draggable from "vuedraggable";
 import { useRouter } from "vue-router";
 import api from "../services/api";
 
-const props = defineProps({
-  id: String,
-});
-
+const props = defineProps({ id: String });
 const router = useRouter();
 const isEdit = computed(() => !!props.id);
 
+// Step / Hazard / Control Factories
 const createStep = () => ({
   id: Date.now() + Math.random(),
   description: "",
@@ -207,6 +234,7 @@ const createStep = () => ({
   photo: null,
   collapsed: false,
   hazards: [],
+  isAddingHazard: false,
 });
 
 const createHazard = () => ({
@@ -214,6 +242,7 @@ const createHazard = () => ({
   description: "",
   collapsed: false,
   controls: [],
+  isAddingControl: false,
 });
 
 const createControl = () => ({
@@ -222,6 +251,7 @@ const createControl = () => ({
   collapsed: false,
 });
 
+// Reactive form state
 const form = reactive({
   title: "",
   author: "",
@@ -235,11 +265,12 @@ const errors = reactive({
   department: "",
 });
 
-const getPhotoUrl = (photo) => {
-  if (!photo) return null;
-  return `http://localhost:8000/${photo}`;
-};
+// Helpers for photos
+const getPhotoUrl = (photo) =>
+  photo ? `http://localhost:8000/${photo}` : null;
+const getFileName = (photo) => photo?.split("/").pop() || "";
 
+// Lifecycle
 onMounted(async () => {
   if (props.id) {
     const response = await api.get(`/jhas/${props.id}`);
@@ -247,49 +278,77 @@ onMounted(async () => {
 
     form.steps.forEach((step) => {
       step.collapsed = false;
+      step.isAddingHazard = step.hazards?.length > 0;
+      step.hazards?.forEach((hazard) => {
+        hazard.collapsed = false;
+        hazard.isAddingControl = hazard.controls?.length > 0;
+      });
     });
   }
 });
 
+// Actions
 const cancel = () => router.push("/");
-
 const deleteJha = async () => {
   if (confirm("Delete this JHA?")) {
     await api.delete(`/jhas/${props.id}`);
     router.push("/");
   }
 };
-
 const validate = () => {
   errors.title = !form.title ? "Title is required" : "";
   errors.author = !form.author ? "Author is required" : "";
   errors.department = !form.department ? "Department is required" : "";
-
   return !errors.title && !errors.author && !errors.department;
 };
 
-const addStep = () => form.steps.push(createStep());
+// Add / Remove
+const addStep = () => {
+  const step = createStep();
+  step.isAddingHazard = true;
+  form.steps.push(step);
+};
 const removeStep = (i) => form.steps.splice(i, 1);
 
-const addHazard = (step) => step.hazards.push(createHazard());
-const removeHazard = (step, i) => step.hazards.splice(i, 1);
+const addHazard = (step) => {
+  const hazard = createHazard();
+  hazard.isAddingControl = true;
+  step.hazards.push(hazard);
+  step.isAddingHazard = true;
+};
+const removeHazard = (step, i) => {
+  step.hazards.splice(i, 1);
+  if (!step.hazards.length) step.isAddingHazard = false;
+};
 
-const addControl = (hazard) => hazard.controls.push(createControl());
-const removeControl = (hazard, i) => hazard.controls.splice(i, 1);
+const addControl = (hazard) => {
+  hazard.controls.push(createControl());
+  hazard.isAddingControl = true;
+};
+const removeControl = (hazard, i) => {
+  hazard.controls.splice(i, 1);
+  if (!hazard.controls.length) hazard.isAddingControl = false;
+};
 
+// File handling
 const onFileChange = (event, step) => {
   const file = event.target.files[0];
   if (!file) return;
-
   step.file = file;
   step.preview = URL.createObjectURL(file);
 };
 
+const removePhoto = (step) => {
+  step.file = null;
+  step.preview = null;
+  step.photo = null;
+};
+
+// Save
 const save = async () => {
   if (!validate()) return;
 
   const formData = new FormData();
-
   formData.append("title", form.title);
   formData.append("author", form.author);
   formData.append("department", form.department);
@@ -299,6 +358,7 @@ const save = async () => {
     JSON.stringify(
       form.steps.map((step) => ({
         description: step.description,
+        photo: step.photo,
         hazards: step.hazards.map((hazard) => ({
           description: hazard.description,
           controls: hazard.controls.map((control) => ({
@@ -310,9 +370,7 @@ const save = async () => {
   );
 
   form.steps.forEach((step) => {
-    if (step.file) {
-      formData.append("photos", step.file);
-    }
+    if (step.file) formData.append("photos", step.file);
   });
 
   if (isEdit.value) {

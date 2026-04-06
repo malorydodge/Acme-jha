@@ -74,7 +74,7 @@
 
       <footer class="modal-card-foot">
         <button class="button is-primary" @click="editJha">Edit</button>
-        <button class="button is-danger" @click="deleteJha">Delete</button>
+        <button class="button is-danger mx-2" @click="deleteJha">Delete</button>
         <button class="button" @click="close">Close</button>
       </footer>
     </div>
