@@ -134,7 +134,8 @@ const isExpandable = (step) => {
 
 const formatDate = (date) => {
   if (!date) return "-";
-  return new Date(date).toLocaleDateString();
+  const [year, month, day] = date.split("T")[0].split("-");
+  return `${month}/${day}/${year}`;
 };
 
 watch(

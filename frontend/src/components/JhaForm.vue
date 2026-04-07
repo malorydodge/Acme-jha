@@ -44,7 +44,12 @@
 
         <div class="field">
           <label class="label">Date</label>
-          <input type="date" class="input" v-model="form.job_date" />
+          <input
+            type="text"
+            class="input"
+            v-model="form.job_date"
+            placeholder="mm/dd/yyyy"
+          />
         </div>
       </div>
     </div>
@@ -262,6 +267,20 @@ const props = defineProps({ id: String });
 const router = useRouter();
 const isEdit = computed(() => !!props.id);
 
+// Date Helpers
+const formatDateDisplay = (date) => {
+  if (!date) return "";
+
+  const [year, month, day] = date.split("T")[0].split("-");
+  return `${month}/${day}/${year}`;
+};
+
+const formatForSave = (dateStr) => {
+  if (!dateStr) return "";
+  const [month, day, year] = dateStr.split("/");
+  return month && day && year ? `${year}-${month}-${day}` : dateStr;
+};
+
 // Step / Hazard / Control Factories
 const createStep = () => ({
   id: Date.now() + Math.random(),
@@ -323,6 +342,8 @@ onMounted(async () => {
   if (props.id) {
     const response = await api.get(`/jhas/${props.id}`);
     Object.assign(form, response.data);
+
+    form.job_date = formatDateDisplay(form.job_date);
 
     form.steps.forEach((step) => {
       step.collapsed = false;
@@ -425,7 +446,7 @@ const save = async () => {
   formData.append("location", form.location || "");
   formData.append("job_title", form.job_title || "");
   formData.append("supervisor", form.supervisor || "");
-  formData.append("job_date", form.job_date || "");
+  formData.append("job_date", formatForSave(form.job_date) || "");
 
   formData.append(
     "steps",
