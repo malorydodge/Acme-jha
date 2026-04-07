@@ -9,20 +9,45 @@
       <p v-if="errors.title" class="help is-danger">{{ errors.title }}</p>
     </div>
 
-    <div class="field">
-      <label class="label">Author</label>
-      <input class="input" v-model="form.author" />
-      <p v-if="errors.author" class="help is-danger">{{ errors.author }}</p>
-    </div>
+    <div class="columns">
+      <div class="column is-half">
+        <div class="field">
+          <label class="label">Author</label>
+          <input class="input" v-model="form.author" />
+          <p v-if="errors.author" class="help is-danger">{{ errors.author }}</p>
+        </div>
 
-    <div class="field">
-      <label class="label">Department</label>
-      <input class="input" v-model="form.department" />
-      <p v-if="errors.department" class="help is-danger">
-        {{ errors.department }}
-      </p>
-    </div>
+        <div class="field">
+          <label class="label">Department</label>
+          <input class="input" v-model="form.department" />
+          <p v-if="errors.department" class="help is-danger">
+            {{ errors.department }}
+          </p>
+        </div>
 
+        <div class="field">
+          <label class="label">Location</label>
+          <input class="input" v-model="form.location" />
+        </div>
+      </div>
+
+      <div class="column is-half">
+        <div class="field">
+          <label class="label">Job Title</label>
+          <input class="input" v-model="form.job_title" />
+        </div>
+
+        <div class="field">
+          <label class="label">Supervisor</label>
+          <input class="input" v-model="form.supervisor" />
+        </div>
+
+        <div class="field">
+          <label class="label">Date</label>
+          <input type="date" class="input" v-model="form.job_date" />
+        </div>
+      </div>
+    </div>
     <!-- Steps -->
     <div class="steps">
       <div class="level" v-if="form.steps.length || isAddingStep">
@@ -72,7 +97,7 @@
                 <input
                   type="file"
                   @change="onFileChange($event, step)"
-                  :value="step.file?.name || ''"
+                  accept="image/*"
                 />
 
                 <div v-if="step.preview || step.photo">
@@ -80,13 +105,17 @@
                     :src="step.preview || getPhotoUrl(step.photo)"
                     class="step-image"
                   />
+
                   <button
                     class="button is-small is-danger mt-1 is-pulled-right"
                     @click="removePhoto(step)"
                   >
                     Remove Photo
                   </button>
-                  <p>{{ step.file?.name || getFileName(step.photo) }}</p>
+
+                  <p>
+                    {{ step.file?.name || getFileName(step.photo) }}
+                  </p>
                 </div>
               </div>
 
@@ -195,6 +224,7 @@
         </template>
       </draggable>
     </div>
+
     <div class="container m-2">
       <button v-if="isEdit" class="button is-pulled-right mr-2" @click="cancel">
         Cancel
@@ -256,6 +286,10 @@ const form = reactive({
   title: "",
   author: "",
   department: "",
+  location: "",
+  job_title: "",
+  supervisor: "",
+  job_date: "",
   steps: [],
 });
 
@@ -268,6 +302,7 @@ const errors = reactive({
 // Helpers for photos
 const getPhotoUrl = (photo) =>
   photo ? `http://localhost:8000/${photo}` : null;
+
 const getFileName = (photo) => photo?.split("/").pop() || "";
 
 // Lifecycle
@@ -278,6 +313,7 @@ onMounted(async () => {
 
     form.steps.forEach((step) => {
       step.collapsed = false;
+      step.preview = null;
       step.isAddingHazard = step.hazards?.length > 0;
       step.hazards?.forEach((hazard) => {
         hazard.collapsed = false;
@@ -289,12 +325,14 @@ onMounted(async () => {
 
 // Actions
 const cancel = () => router.push("/");
+
 const deleteJha = async () => {
   if (confirm("Delete this JHA?")) {
     await api.delete(`/jhas/${props.id}`);
     router.push("/");
   }
 };
+
 const validate = () => {
   errors.title = !form.title ? "Title is required" : "";
   errors.author = !form.author ? "Author is required" : "";
@@ -308,6 +346,7 @@ const addStep = () => {
   step.isAddingHazard = true;
   form.steps.push(step);
 };
+
 const removeStep = (i) => form.steps.splice(i, 1);
 
 const addHazard = (step) => {
@@ -316,6 +355,7 @@ const addHazard = (step) => {
   step.hazards.push(hazard);
   step.isAddingHazard = true;
 };
+
 const removeHazard = (step, i) => {
   step.hazards.splice(i, 1);
   if (!step.hazards.length) step.isAddingHazard = false;
@@ -325,6 +365,7 @@ const addControl = (hazard) => {
   hazard.controls.push(createControl());
   hazard.isAddingControl = true;
 };
+
 const removeControl = (hazard, i) => {
   hazard.controls.splice(i, 1);
   if (!hazard.controls.length) hazard.isAddingControl = false;
@@ -336,6 +377,8 @@ const onFileChange = (event, step) => {
   if (!file) return;
   step.file = file;
   step.preview = URL.createObjectURL(file);
+  // Clear saved photo so preview takes precedence
+  step.photo = null;
 };
 
 const removePhoto = (step) => {
@@ -352,6 +395,10 @@ const save = async () => {
   formData.append("title", form.title);
   formData.append("author", form.author);
   formData.append("department", form.department);
+  formData.append("location", form.location || "");
+  formData.append("job_title", form.job_title || "");
+  formData.append("supervisor", form.supervisor || "");
+  formData.append("job_date", form.job_date || "");
 
   formData.append(
     "steps",
@@ -370,7 +417,9 @@ const save = async () => {
   );
 
   form.steps.forEach((step) => {
-    if (step.file) formData.append("photos", step.file);
+    if (step.file) {
+      formData.append("photos", step.file);
+    }
   });
 
   if (isEdit.value) {

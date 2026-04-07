@@ -5,7 +5,7 @@ import json
 import os
 import shutil
 import uuid
-
+from datetime import date
 from database import SessionLocal
 import models
 import schemas
@@ -48,6 +48,10 @@ async def create_jha(
     title: str = Form(...),
     author: str = Form(...),
     department: str = Form(...),
+    location: Optional[str] = Form(None),
+    job_title: Optional[str] = Form(None),
+    supervisor: Optional[str] = Form(None),
+    job_date: Optional[date] = Form(None),
     steps: Optional[str] = Form(None),
     photos: List[UploadFile] = File([]),
     db: Session = Depends(get_db)
@@ -57,7 +61,11 @@ async def create_jha(
     jha = models.JHA(
         title=title,
         author=author,
-        department=department
+        department=department,
+        location=location,
+        job_title=job_title,
+        supervisor=supervisor,
+        job_date=job_date
     )
 
     db.add(jha)
@@ -131,6 +139,10 @@ async def update_jha(
     title: str = Form(...),
     author: str = Form(...),
     department: str = Form(...),
+    location: Optional[str] = Form(None),
+    job_title: Optional[str] = Form(None),
+    supervisor: Optional[str] = Form(None),
+    job_date: Optional[date] = Form(None),
     steps: Optional[str] = Form(None),
     photos: List[UploadFile] = File([]),
     db: Session = Depends(get_db)
@@ -154,6 +166,10 @@ async def update_jha(
     db_jha.title = title
     db_jha.author = author
     db_jha.department = department
+    db_jha.location = location
+    db_jha.job_title = job_title
+    db_jha.supervisor = supervisor
+    db_jha.job_date = job_date
 
     db_jha.steps.clear()
 

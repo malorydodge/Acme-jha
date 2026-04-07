@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Date
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -10,6 +10,10 @@ class JHA(Base):
     title = Column(String)
     author = Column(String)
     department = Column(String)
+    location = Column(String, nullable=True)
+    job_title = Column(String, nullable=True)
+    supervisor = Column(String, nullable=True)
+    job_date = Column(Date, nullable=True)
 
     steps = relationship("Step", back_populates="jha", cascade="all, delete")
 
@@ -19,7 +23,7 @@ class Step(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     description = Column(Text)
-    photo = Column(String, nullable=True)  # NEW
+    photo = Column(String, nullable=True)
     jha_id = Column(Integer, ForeignKey("jhas.id"))
 
     jha = relationship("JHA", back_populates="steps")

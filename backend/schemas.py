@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
+from datetime import date
 
 
 class Control(BaseModel):
@@ -23,7 +24,7 @@ class Hazard(BaseModel):
 class Step(BaseModel):
     id: Optional[int]
     description: str
-    photo: Optional[str]  # NEW
+    photo: Optional[str]
     hazards: List[Hazard] = []
 
     class Config:
@@ -34,6 +35,10 @@ class JHABase(BaseModel):
     title: str
     author: str
     department: str
+    location: Optional[str] = None
+    job_title: Optional[str] = None
+    supervisor: Optional[str] = None
+    job_date: Optional[date] = Field(default=None)
 
 
 class JHACreate(JHABase):

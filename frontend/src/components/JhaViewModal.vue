@@ -12,10 +12,19 @@
 
       <section class="modal-card-body" v-if="jha">
         <div class="content">
-          <p><strong>Title:</strong> {{ jha.title }}</p>
-          <p><strong>Author:</strong> {{ jha.author }}</p>
-          <p><strong>Department:</strong> {{ jha.department }}</p>
-
+          <div class="columns">
+            <div class="column is-half">
+              <p><strong>Title:</strong> {{ jha.title }}</p>
+              <p><strong>Author:</strong> {{ jha.author }}</p>
+              <p><strong>Department:</strong> {{ jha.department }}</p>
+              <p><strong>Location:</strong> {{ jha.location || "-" }}</p>
+            </div>
+            <div class="column is-half">
+              <p><strong>Job Title:</strong> {{ jha.job_title || "-" }}</p>
+              <p><strong>Supervisor:</strong> {{ jha.supervisor || "-" }}</p>
+              <p><strong>Date:</strong> {{ formatDate(jha.job_date) }}</p>
+            </div>
+          </div>
           <hr />
 
           <h4 class="title is-5">Steps</h4>
@@ -105,6 +114,11 @@ const isExpandable = (step) => {
     step.hazards?.length ||
     step.hazards?.some((h) => h.controls?.length)
   );
+};
+
+const formatDate = (date) => {
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString();
 };
 
 watch(
