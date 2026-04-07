@@ -13,8 +13,6 @@ import schemas
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
 
 def save_upload(file: UploadFile):
     if not file:
