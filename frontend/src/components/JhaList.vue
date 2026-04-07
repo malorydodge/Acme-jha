@@ -33,7 +33,7 @@
     </nav>
 
     <div
-      class="box"
+      class="box hover-highlight"
       v-for="jha in filteredItems"
       :key="jha.id"
       @click="viewJha(jha)"
@@ -121,5 +121,11 @@ const deleteJha = async (jha) => {
 <style scoped>
 .button.mx-2 {
   margin-top: -0.5rem;
+}
+
+.hover-highlight:hover {
+  background-color: #f5f5f5;
+  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+    0 0px 0 1px rgba(10, 10, 10, 0.02);
 }
 </style>

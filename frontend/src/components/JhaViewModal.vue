@@ -29,6 +29,13 @@
 
           <h4 class="title is-5">Steps</h4>
 
+          <div
+            v-if="!jha.steps || jha.steps.length === 0"
+            class="notification is-light"
+          >
+            No steps yet
+          </div>
+
           <div v-for="(step, sIndex) in jha.steps" :key="step.id" class="box">
             <div class="level">
               <strong>Step {{ sIndex + 1 }}</strong>

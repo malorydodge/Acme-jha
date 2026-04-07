@@ -89,6 +89,9 @@
               <div class="field">
                 <label class="label">Step Description</label>
                 <input class="input" v-model="step.description" />
+                <p v-if="step.error" class="help is-danger">
+                  {{ step.error }}
+                </p>
               </div>
 
               <!-- Photo -->
@@ -163,6 +166,9 @@
                         placeholder="Hazard description"
                         v-model="hazard.description"
                       />
+                      <p v-if="hazard.error" class="help is-danger">
+                        {{ hazard.error }}
+                      </p>
                     </div>
 
                     <!-- Controls -->
@@ -211,6 +217,9 @@
                             placeholder="Control"
                             v-model="control.description"
                           />
+                          <p v-if="control.error" class="help is-danger">
+                            {{ control.error }}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -259,6 +268,7 @@ const isEdit = computed(() => !!props.id);
 const createStep = () => ({
   id: Date.now() + Math.random(),
   description: "",
+  error: "",
   file: null,
   preview: null,
   photo: null,
@@ -270,6 +280,7 @@ const createStep = () => ({
 const createHazard = () => ({
   id: Date.now() + Math.random(),
   description: "",
+  error: "",
   collapsed: false,
   controls: [],
   isAddingControl: false,
@@ -278,10 +289,10 @@ const createHazard = () => ({
 const createControl = () => ({
   id: Date.now() + Math.random(),
   description: "",
+  error: "",
   collapsed: false,
 });
 
-// Reactive form state
 const form = reactive({
   title: "",
   author: "",
@@ -337,7 +348,29 @@ const validate = () => {
   errors.title = !form.title ? "Title is required" : "";
   errors.author = !form.author ? "Author is required" : "";
   errors.department = !form.department ? "Department is required" : "";
-  return !errors.title && !errors.author && !errors.department;
+
+  let valid = !errors.title && !errors.author && !errors.department;
+
+  form.steps.forEach((step) => {
+    step.error = !step.description ? "Step description is required" : "";
+    if (step.error) valid = false;
+
+    step.hazards.forEach((hazard) => {
+      hazard.error = !hazard.description
+        ? "Hazard description is required"
+        : "";
+      if (hazard.error) valid = false;
+
+      hazard.controls.forEach((control) => {
+        control.error = !control.description
+          ? "Control description is required"
+          : "";
+        if (control.error) valid = false;
+      });
+    });
+  });
+
+  return valid;
 };
 
 // Add / Remove
