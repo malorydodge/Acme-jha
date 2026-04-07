@@ -12,12 +12,12 @@ origins = [
     "http://localhost:8080", 
     "http://localhost:5173",
     "https://acme-jha-production.up.railway.app",
+    "https://acme-jha.vercel.app/",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
