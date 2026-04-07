@@ -6,13 +6,15 @@ from routes import jhas, steps, hazards, controls
 from fastapi.staticfiles import StaticFiles
 import os
 
-UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
-
-models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI()
 
+UPLOAD_DIR = "uploads"
+
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+models.Base.metadata.create_all(bind=engine)
 
 app.include_router(jhas.router)
 app.include_router(steps.router)
