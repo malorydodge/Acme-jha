@@ -50,13 +50,13 @@
     </div>
     <!-- Steps -->
     <div class="steps">
-      <div class="level" v-if="form.steps.length || isAddingStep">
-        <h2 class="subtitle">Steps</h2>
+      <div class="level">
+        <h2 v-if="form.steps.length" class="subtitle">Steps</h2>
+        <p v-else>No steps yet</p>
         <button class="button is-small is-primary" @click="addStep">
           Add Step
         </button>
       </div>
-      <p v-else>No steps yet</p>
 
       <draggable v-model="form.steps" item-key="id" handle=".drag-handle">
         <template #item="{ element: step, index }">
@@ -123,12 +123,12 @@
               </div>
 
               <!-- Hazards -->
-              <div
-                class="hazards"
-                v-if="step.hazards.length || step.isAddingHazard"
-              >
+              <div class="hazards">
                 <div class="level">
-                  <h4 class="subtitle is-4">Hazards</h4>
+                  <h4 class="subtitle is-4" v-if="step.hazards.length">
+                    Hazards
+                  </h4>
+                  <p v-else class="has-text-grey">No hazards yet</p>
                   <button class="button is-small mx-1" @click="addHazard(step)">
                     Add Hazard
                   </button>
@@ -172,12 +172,12 @@
                     </div>
 
                     <!-- Controls -->
-                    <div
-                      class="controls"
-                      v-if="hazard.controls.length || hazard.isAddingControl"
-                    >
+                    <div class="controls">
                       <div class="level">
-                        <h5 class="subtitle is-5">Controls</h5>
+                        <h5 class="subtitle is-5" v-if="hazard.controls.length">
+                          Controls
+                        </h5>
+                        <p v-else class="has-text-grey">No controls yet</p>
                         <button
                           class="button is-small"
                           @click="addControl(hazard)"
@@ -223,11 +223,9 @@
                         </div>
                       </div>
                     </div>
-                    <p v-else class="has-text-grey">No controls yet</p>
                   </div>
                 </div>
               </div>
-              <p v-else class="has-text-grey">No hazards yet</p>
             </div>
           </div>
         </template>
@@ -274,7 +272,6 @@ const createStep = () => ({
   photo: null,
   collapsed: false,
   hazards: [],
-  isAddingHazard: false,
 });
 
 const createHazard = () => ({
@@ -283,7 +280,6 @@ const createHazard = () => ({
   error: "",
   collapsed: false,
   controls: [],
-  isAddingControl: false,
 });
 
 const createControl = () => ({
@@ -325,10 +321,8 @@ onMounted(async () => {
     form.steps.forEach((step) => {
       step.collapsed = false;
       step.preview = null;
-      step.isAddingHazard = step.hazards?.length > 0;
       step.hazards?.forEach((hazard) => {
         hazard.collapsed = false;
-        hazard.isAddingControl = hazard.controls?.length > 0;
       });
     });
   }
@@ -376,7 +370,6 @@ const validate = () => {
 // Add / Remove
 const addStep = () => {
   const step = createStep();
-  step.isAddingHazard = true;
   form.steps.push(step);
 };
 
@@ -384,24 +377,19 @@ const removeStep = (i) => form.steps.splice(i, 1);
 
 const addHazard = (step) => {
   const hazard = createHazard();
-  hazard.isAddingControl = true;
   step.hazards.push(hazard);
-  step.isAddingHazard = true;
 };
 
 const removeHazard = (step, i) => {
   step.hazards.splice(i, 1);
-  if (!step.hazards.length) step.isAddingHazard = false;
 };
 
 const addControl = (hazard) => {
   hazard.controls.push(createControl());
-  hazard.isAddingControl = true;
 };
 
 const removeControl = (hazard, i) => {
   hazard.controls.splice(i, 1);
-  if (!hazard.controls.length) hazard.isAddingControl = false;
 };
 
 // File handling
