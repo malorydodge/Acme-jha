@@ -308,7 +308,9 @@ const errors = reactive({
 
 // Helpers for photos
 const getPhotoUrl = (photo) =>
-  photo ? `http://localhost:8000/${photo}` : null;
+  photo
+    ? `${api.defaults.baseURL}${photo.startsWith("/") ? "" : "/"}${photo}`
+    : null;
 
 const getFileName = (photo) => photo?.split("/").pop() || "";
 

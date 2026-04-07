@@ -99,6 +99,7 @@
 
 <script setup>
 import { watch } from "vue";
+import api from "../services/api";
 
 const props = defineProps({
   jha: Object,
@@ -111,9 +112,10 @@ const close = () => emit("close");
 const editJha = () => emit("edit");
 const deleteJha = () => emit("delete");
 
-const getPhotoUrl = (photo) => {
-  return `http://localhost:8000/${photo}`;
-};
+const getPhotoUrl = (photo) =>
+  photo
+    ? `${api.defaults.baseURL}${photo.startsWith("/") ? "" : "/"}${photo}`
+    : null;
 
 const isExpandable = (step) => {
   return (
