@@ -12,7 +12,7 @@ origins = [
     "http://localhost:8080", 
     "http://localhost:5173",
     "https://acme-jha-production.up.railway.app",
-    "https://acme-jha.vercel.app/",
+    "https://acme-jha.vercel.app",
 ]
 
 app.add_middleware(
