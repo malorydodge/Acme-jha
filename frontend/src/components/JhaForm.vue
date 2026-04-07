@@ -307,13 +307,14 @@ const errors = reactive({
 });
 
 // Helpers for photos
-const getPhotoUrl = (photo) =>
-  photo
-    ? `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/${photo.replace(
-        /^\//,
-        "",
-      )}`
-    : null;
+const getPhotoUrl = (photo) => {
+  if (!photo) return null;
+
+  const base = import.meta.env.VITE_API_URL.replace(/\/+$/, "");
+  const path = photo.replace(/^\/+/, "");
+
+  return `${base}/${path}`;
+};
 
 const getFileName = (photo) => photo?.split("/").pop() || "";
 
