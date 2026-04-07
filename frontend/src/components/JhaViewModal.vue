@@ -114,7 +114,10 @@ const deleteJha = () => emit("delete");
 
 const getPhotoUrl = (photo) =>
   photo
-    ? `${api.defaults.baseURL}${photo.startsWith("/") ? "" : "/"}${photo}`
+    ? `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/${photo.replace(
+        /^\//,
+        "",
+      )}`
     : null;
 
 const isExpandable = (step) => {

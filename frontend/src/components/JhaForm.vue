@@ -309,7 +309,10 @@ const errors = reactive({
 // Helpers for photos
 const getPhotoUrl = (photo) =>
   photo
-    ? `${api.defaults.baseURL}${photo.startsWith("/") ? "" : "/"}${photo}`
+    ? `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/${photo.replace(
+        /^\//,
+        "",
+      )}`
     : null;
 
 const getFileName = (photo) => photo?.split("/").pop() || "";
