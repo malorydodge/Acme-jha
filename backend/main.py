@@ -24,6 +24,8 @@ app.include_router(controls.router)
 origins = [
     "http://localhost:8080", 
     "http://localhost:5173",
+    "https://acme-ayoyrtlrr-malory-dodges-projects.vercel.app/",
+    "https://acme-jha-production.up.railway.app/",
 ]
 
 app.add_middleware(

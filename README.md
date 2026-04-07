@@ -8,7 +8,7 @@ This application allows users to create structured Job Hazard Analyses with step
 
 # Live Demo
 
-Frontend:
+Frontend: https://acme-ayoyrtlrr-malory-dodges-projects.vercel.app/
 Backend API: https://acme-jha-production.up.railway.app/
 
 ---
