@@ -11,16 +11,16 @@ app = FastAPI()
 origins = [
     "http://localhost:8080", 
     "http://localhost:5173",
-    "https://acme-ayoyrtlrr-malory-dodges-projects.vercel.app",
     "https://acme-jha-production.up.railway.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,         # Allows specific origins
-    allow_credentials=True,        # Allows cookies/auth headers to be sent
-    allow_methods=["*"],           # Allows all methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
-    allow_headers=["*"],           # Allows all headers (Content-Type, Authorization, etc.)
+    allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 UPLOAD_DIR = "uploads"
