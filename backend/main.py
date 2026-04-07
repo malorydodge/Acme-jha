@@ -21,16 +21,16 @@ app.include_router(steps.router)
 app.include_router(hazards.router)
 app.include_router(controls.router)
 
-origins = [
-    "http://localhost:8080", 
-    "http://localhost:5173",
-    "https://acme-ayoyrtlrr-malory-dodges-projects.vercel.app/",
-    "https://acme-jha-production.up.railway.app/",
-]
+# origins = [
+#     "http://localhost:8080", 
+#     "http://localhost:5173",
+#     "https://acme-ayoyrtlrr-malory-dodges-projects.vercel.app/",
+#     "https://acme-jha-production.up.railway.app/",
+# ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,         # Allows specific origins
+    allow_origins=["*"],           # Allows specific origins
     allow_credentials=True,        # Allows cookies/auth headers to be sent
     allow_methods=["*"],           # Allows all methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
     allow_headers=["*"],           # Allows all headers (Content-Type, Authorization, etc.)
