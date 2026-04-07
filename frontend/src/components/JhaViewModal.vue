@@ -99,7 +99,6 @@
 
 <script setup>
 import { watch } from "vue";
-import api from "../services/api";
 
 const props = defineProps({
   jha: Object,
@@ -110,7 +109,11 @@ const emit = defineEmits(["close", "edit", "delete"]);
 
 const close = () => emit("close");
 const editJha = () => emit("edit");
-const deleteJha = () => emit("delete");
+
+const deleteJha = () => {
+  emit("delete");
+  emit("close");
+};
 
 const getPhotoUrl = (photo) => {
   if (!photo) return null;
