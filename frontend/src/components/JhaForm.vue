@@ -99,6 +99,20 @@
                 </p>
               </div>
 
+              <!-- Step Notes -->
+              <div class="field">
+                <label class="label">Step Notes</label>
+                <textarea class="textarea" v-model="step.notes"></textarea>
+              </div>
+
+              <!-- Step Completed -->
+              <div class="field">
+                <label class="label checkbox is-pulled-right"
+                  >Completed:
+                  <input type="checkbox" v-model="step.completed" />
+                </label>
+              </div>
+
               <!-- Photo -->
               <div class="field">
                 <label class="label">Photo</label>
@@ -285,6 +299,8 @@ const formatForSave = (dateStr) => {
 const createStep = () => ({
   id: Date.now() + Math.random(),
   description: "",
+  notes: "",
+  completed: false,
   error: "",
   file: null,
   preview: null,
@@ -453,7 +469,9 @@ const save = async () => {
     JSON.stringify(
       form.steps.map((step) => ({
         description: step.description,
-        photo: step.photo,
+        notes: step.notes,
+        completed: step.completed,
+        photo: step.file ? null : step.photo,
         hazards: step.hazards.map((hazard) => ({
           description: hazard.description,
           controls: hazard.controls.map((control) => ({

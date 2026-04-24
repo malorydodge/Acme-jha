@@ -52,6 +52,12 @@
             <div v-if="step.expanded">
               <p>{{ step.description }}</p>
 
+              <p>Notes: {{ step.notes }}</p>
+
+              <p>
+                Completed: {{ step.completed ? "Completed" : "Incomplete" }}
+              </p>
+
               <img
                 v-if="step.photo"
                 :src="getPhotoUrl(step.photo)"
@@ -127,6 +133,8 @@ const getPhotoUrl = (photo) => {
 const isExpandable = (step) => {
   return (
     step.photo ||
+    step.notes ||
+    step.description ||
     step.hazards?.length ||
     step.hazards?.some((h) => h.controls?.length)
   );

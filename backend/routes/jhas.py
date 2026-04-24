@@ -81,6 +81,8 @@ async def create_jha(
 
         step = models.Step(
             description=step_data["description"],
+            notes=step_data["notes"],
+            completed=step_data["completed"],
             photo=photo_path,
             jha_id=jha.id
         )
@@ -174,7 +176,7 @@ async def update_jha(
     photo_index = 0
 
     for step_data in steps_data:
-        photo_path = None
+        photo_path = step_data.get("photo")
 
         if photo_index < len(photos):
             photo_path = save_upload(photos[photo_index])
@@ -182,6 +184,8 @@ async def update_jha(
 
         db_step = models.Step(
             description=step_data["description"],
+            notes=step_data["notes"],
+            completed=step_data["completed"],
             photo=photo_path
         )
 

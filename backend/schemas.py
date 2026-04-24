@@ -24,6 +24,8 @@ class Hazard(BaseModel):
 class Step(BaseModel):
     id: Optional[int]
     description: str
+    notes: Optional[str] = None
+    completed: bool = False
     photo: Optional[str]
     hazards: List[Hazard] = []
 
